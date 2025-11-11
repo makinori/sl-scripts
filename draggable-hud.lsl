@@ -1,14 +1,14 @@
 // script is just an example for reference
 
-// add a new linked cube named Gizmo
+// add a new linked cube named Handle
 // position and scale it on-top of your button
 // should be transparent but give it some transparency for testing
 // it will scale really large so that touch() can get mouse position
 
-string GIZMO_NAME = "Gizmo";
+string HANDLE_NAME = "Handle";
 
-integer gizmoLink;
-vector gizmoSizeBeforeDrag;
+integer handleLink;
+vector handleSizeBeforeDrag;
 
 vector primStartPos;
 vector touchStartPos;
@@ -17,16 +17,16 @@ integer isDragging;
 integer didDrag;
 
 startDrag() {
-    gizmoSizeBeforeDrag = llList2Vector(
-        llGetLinkPrimitiveParams(gizmoLink, [PRIM_SIZE]), 0
+    handleSizeBeforeDrag = llList2Vector(
+        llGetLinkPrimitiveParams(handleLink, [PRIM_SIZE]), 0
     );
         
     primStartPos = llGetLocalPos();
     touchStartPos = llDetectedTouchPos(0);
 
     // make big
-    llSetLinkPrimitiveParamsFast(gizmoLink, [
-        PRIM_SIZE, <gizmoSizeBeforeDrag.x, 16, 16>
+    llSetLinkPrimitiveParamsFast(handleLink, [
+        PRIM_SIZE, <handleSizeBeforeDrag.x, 16, 16>
     ]);
 
     isDragging = TRUE;
@@ -34,8 +34,8 @@ startDrag() {
 }
 
 stopDrag() {
-    llSetLinkPrimitiveParamsFast(gizmoLink, [
-        PRIM_SIZE, gizmoSizeBeforeDrag
+    llSetLinkPrimitiveParamsFast(handleLink, [
+        PRIM_SIZE, handleSizeBeforeDrag
     ]);
 
     isDragging = FALSE;
@@ -60,7 +60,7 @@ updateDrag() {
     didDrag = TRUE;
 }
 
-integer getGizmoLinkByName(string name) {
+integer gethandleLinkByName(string name) {
     integer i = llGetNumberOfPrims();
     for (; i >= 0; --i) {
         if (llGetLinkName(i) == name) {
@@ -73,10 +73,10 @@ integer getGizmoLinkByName(string name) {
 default {
     touch_start(integer n) {
         integer link = llDetectedLinkNumber(0);
-        if (llGetLinkName(link) != GIZMO_NAME) {
+        if (llGetLinkName(link) != HANDLE_NAME) {
             return;
         }
-        gizmoLink = link;
+        handleLink = link;
         startDrag(); // even if its just a click
         llResetTime(); // gives us some time to register a click
     }
