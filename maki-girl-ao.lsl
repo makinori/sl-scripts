@@ -1,21 +1,21 @@
 // TODO: add typing animation
 
-list ground_sits = [
+list GROUND_SITS = [
     "BLAOeilGSit01_4;feet wiggle",
     "BLAOeilGSit02_4;legs side",
     "BLAOomiGSit03_4;squatting",
     "BLAOeilGSit03_4;sleeping"
 ];
 
-list ledge_sits = [
+list LEDGE_SITS = [
     "BLAOeilSit03_4;neutral",
     "BLAOeilSit01_4;side legs",
     "BLAOeilSit02_4;leaning in"
 ];
 
-float time_between_stands = 30;
+float TIME_BETWEEN_STANDS = 30;
 
-list stand_anims = [
+list STAND_ANIMS = [
     "BLAOeilStand02_3",
     "BLAOeilStand04_3",
     "BLAOeilStand05_3",
@@ -35,48 +35,48 @@ list stand_anims = [
 
 integer enabled = TRUE;
 
-integer current_ground_sit;
-integer current_ledge_sit;
-integer current_stand = -1;
+integer currentGroundSit;
+integer currentLedgeSit;
+integer currentStand = -1;
 
-string current_menu;
-integer dialog_channel;
-integer dialog_listener = -1;
-float time_since_last_dialog;
+string currentMenu;
+integer dialogChannel;
+integer dialogListener = -1;
+float timeSinceLastDialog;
 
-string pair_get_key(string pair) {
-    integer delim_index = llSubStringIndex(pair, ";");
-    if (delim_index == -1) {
+string pairGetKey(string pair) {
+    integer delimIndex = llSubStringIndex(pair, ";");
+    if (delimIndex == -1) {
         llOwnerSay("failed to find delim in: " + pair);
         return "";
     }
-    return llGetSubString(pair, 0, delim_index - 1);
+    return llGetSubString(pair, 0, delimIndex - 1);
 }
 
-string pair_get_value(string pair) {
-    integer delim_index = llSubStringIndex(pair, ";");
-    if (delim_index == -1) {
+string pairGetValue(string pair) {
+    integer delimIndex = llSubStringIndex(pair, ";");
+    if (delimIndex == -1) {
         llOwnerSay("failed to find delim in: " + pair);
         return "";
     }
-    return llDeleteSubString(pair, 0, delim_index);
+    return llDeleteSubString(pair, 0, delimIndex);
 }
 
-list map_get_values(list map_list) {
+list mapGetValues(list mapList) {
     list output;
     integer index;
-    integer length = llGetListLength(map_list);
+    integer length = llGetListLength(mapList);
     for (; index < length; index++) {
-        output += pair_get_value(llList2String(map_list, index));
+        output += pairGetValue(llList2String(mapList, index));
     }
     return output;
 }
 
-integer map_get_index_from_value(list map_list, string value) {
+integer mapGetIndexFromValue(list mapList, string value) {
     integer index;
-    integer length = llGetListLength(map_list);
+    integer length = llGetListLength(mapList);
     for (; index < length; index++) {
-        string needle = pair_get_value(llList2String(map_list, index));
+        string needle = pairGetValue(llList2String(mapList, index));
         if (needle == value) {
             return index;
         }
@@ -84,28 +84,28 @@ integer map_get_index_from_value(list map_list, string value) {
     return -1;
 }
 
-update_sitting() {
+updateSitting() {
     llSetAnimationOverride(
         "Sitting",
-        pair_get_key(llList2String(ledge_sits, current_ledge_sit))
+        pairGetKey(llList2String(LEDGE_SITS, currentLedgeSit))
     );
     llSetAnimationOverride(
         "Sitting on Ground",
-        pair_get_key(llList2String(ground_sits, current_ground_sit))
+        pairGetKey(llList2String(GROUND_SITS, currentGroundSit))
     );
 }
 
-next_stand() {
-    integer new_stand = (integer)llFrand(llGetListLength(stand_anims));
-    if (new_stand == current_stand) {
-        next_stand();
+nextStand() {
+    integer newStand = (integer)llFrand(llGetListLength(STAND_ANIMS));
+    if (newStand == currentStand) {
+        nextStand();
         return;
     }
 
-    current_stand = new_stand;
+    currentStand = newStand;
 
     llSetAnimationOverride(
-        "Standing", llList2String(stand_anims, current_stand)
+        "Standing", llList2String(STAND_ANIMS, currentStand)
     );
 }
 
@@ -125,8 +125,8 @@ set() {
     llSetAnimationOverride("Landing", "BLAOomiLand01_4");
     llSetAnimationOverride("PreJumping", "BLAOomiPreJump01_4");
     llSetAnimationOverride("Running", "BLAOeilRun01_4");
-    update_sitting();
-    next_stand();
+    updateSitting();
+    nextStand();
     llSetAnimationOverride("Standing Up", "BLAOomiStandup01_4"); // big fall
     llSetAnimationOverride("Striding", "BLAOomiFly01_4"); // when stuck
     llSetAnimationOverride("Soft Landing", "BLAOomiLand01_4");
@@ -142,7 +142,7 @@ unset() {
     llResetAnimationOverride("ALL");
 }
 
-update_ui() {
+updateUI() {
     if (enabled) {
         llSetLinkPrimitiveParamsFast(1, [
             PRIM_COLOR, ALL_SIDES, <1,1,1>, 0.7,
@@ -158,20 +158,20 @@ update_ui() {
     }
 }
 
-prepare_dialog(string menu) {
-    current_menu = menu;
+prepareDialog(string menu) {
+    currentMenu = menu;
     // we're not using llGetTime for anything else, so might as well reset
-    time_since_last_dialog = llGetAndResetTime();
-    if (dialog_listener == -1) {
-        dialog_listener = llListen(dialog_channel, "", llGetOwner(), "");
+    timeSinceLastDialog = llGetAndResetTime();
+    if (dialogListener == -1) {
+        dialogListener = llListen(dialogChannel, "", llGetOwner(), "");
     }
 }
 
-end_dialog() {
-    current_menu = "";
-    if (dialog_listener > -1) {
-        llListenRemove(dialog_listener);
-        dialog_listener = -1;
+endDialog() {
+    currentMenu = "";
+    if (dialogListener > -1) {
+        llListenRemove(dialogListener);
+        dialogListener = -1;
     }
 }
 
@@ -179,12 +179,12 @@ default
 {
     state_entry() {
         llRequestPermissions(llGetOwner(), PERMISSION_OVERRIDE_ANIMATIONS);
-        llSetTimerEvent(time_between_stands);
+        llSetTimerEvent(TIME_BETWEEN_STANDS);
         
         // generate dialog channel. recommended by the wiki
-        dialog_channel = -1 - (integer)("0x" + llGetSubString((string)llGetKey(), -7, -1));
+        dialogChannel = -1 - (integer)("0x" + llGetSubString((string)llGetKey(), -7, -1));
         
-        update_ui();
+        updateUI();
     }
 
     attach(key id) {
@@ -206,10 +206,10 @@ default
 
     timer() {
         if (
-            dialog_listener > -1 &&
-            llGetTime() >= time_since_last_dialog + 59
+            dialogListener > -1 &&
+            llGetTime() >= timeSinceLastDialog + 59
         ) {
-            end_dialog();
+            endDialog();
             // llOwnerSay("been more than a minute. stop listening");
         }
 
@@ -217,7 +217,7 @@ default
             return;
         }
 
-        next_stand();
+        nextStand();
     }
 
     touch_start(integer num_detected) {
@@ -228,53 +228,53 @@ default
             } else {
                 set();
             }
-            update_ui();
+            updateUI();
         } else if (link == 2) {
-            prepare_dialog("home");
+            prepareDialog("home");
             llDialog(
                 llGetOwner(), "what would you like?", 
                 ["ground sit", "ledge sit", "next stand"],
-                dialog_channel
+                dialogChannel
             );
         }
     }
     
     listen(integer chan, string name, key id, string msg) {
-        if (current_menu == "home") {
+        if (currentMenu == "home") {
             if (msg == "ground sit") {
-                prepare_dialog("ground sit");
+                prepareDialog("ground sit");
                 llDialog(
                     llGetOwner(), "which ground sit?", 
-                    map_get_values(ground_sits), dialog_channel
+                    mapGetValues(GROUND_SITS), dialogChannel
                 );
             } else if (msg == "ledge sit") {
-                prepare_dialog("ledge sit");
+                prepareDialog("ledge sit");
                 llDialog(
                     llGetOwner(), "which ledge sit?", 
-                    map_get_values(ledge_sits), dialog_channel
+                    mapGetValues(LEDGE_SITS), dialogChannel
                 );
             } else if (msg == "next stand") {
-                next_stand();
-                llSetTimerEvent(time_between_stands); // reset timer
+                nextStand();
+                llSetTimerEvent(TIME_BETWEEN_STANDS); // reset timer
             }
-        } else if (current_menu == "ground sit") {
-            integer index = map_get_index_from_value(ground_sits, msg);
+        } else if (currentMenu == "ground sit") {
+            integer index = mapGetIndexFromValue(GROUND_SITS, msg);
             if (index == -1) {
                 llOwnerSay("failed to find: " + msg);
                 return;
             }
-            current_ground_sit = index;
-            update_sitting();
-            end_dialog();
-        } else if (current_menu == "ledge sit") {
-            integer index = map_get_index_from_value(ledge_sits, msg);
+            currentGroundSit = index;
+            updateSitting();
+            endDialog();
+        } else if (currentMenu == "ledge sit") {
+            integer index = mapGetIndexFromValue(LEDGE_SITS, msg);
             if (index == -1) {
                 llOwnerSay("failed to find: " + msg);
                 return;
             }
-            current_ledge_sit = index;
-            update_sitting();
-            end_dialog();
+            currentLedgeSit = index;
+            updateSitting();
+            endDialog();
         }
     }
 }
