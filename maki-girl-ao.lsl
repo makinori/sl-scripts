@@ -8,9 +8,9 @@ list GROUND_SITS = [
 ];
 
 list LEDGE_SITS = [
-    "BLAOeilSit03_4;neutral",
+    "BLAOeilSit02_4;leaning in",
     "BLAOeilSit01_4;side legs",
-    "BLAOeilSit02_4;leaning in"
+    "BLAOeilSit03_4;neutral"
 ];
 
 float TIME_BETWEEN_STANDS = 30;
