@@ -233,9 +233,12 @@ default
             prepareDialog("home");
             llDialog(
                 llGetOwner(), "what would you like?", 
-                ["ground sit", "ledge sit", "next stand"],
+                ["ground sit", "ledge sit"],
                 dialogChannel
             );
+        } else if (link == 3) {
+            nextStand();
+            llSetTimerEvent(TIME_BETWEEN_STANDS); // reset timer
         }
     }
     
@@ -253,9 +256,6 @@ default
                     llGetOwner(), "which ledge sit?", 
                     mapGetValues(LEDGE_SITS), dialogChannel
                 );
-            } else if (msg == "next stand") {
-                nextStand();
-                llSetTimerEvent(TIME_BETWEEN_STANDS); // reset timer
             }
         } else if (currentMenu == "ground sit") {
             integer index = mapGetIndexFromValue(GROUND_SITS, msg);
